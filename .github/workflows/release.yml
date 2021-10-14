@@ -53,7 +53,8 @@ jobs:
         run: |
             set -o allexport
             source /etc/os-release
-            gbp dch --release --new-version=${GITHUB_REF##*/} --distribution=$VERSION_CODENAME --spawn-editor=never --ignore-branch
+            [[ $GITHUB_REF == *tags* ]] && VER_OPT="--new-version=${GITHUB_REF##*/}" #"
+            gbp dch --release $VER_OPT --distribution=$VERSION_CODENAME --spawn-editor=never --ignore-branch
         working-directory: source
       - name: Build Debian package
         run: debuild --no-sign

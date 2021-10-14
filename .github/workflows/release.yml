@@ -33,7 +33,7 @@ jobs:
       - name: Install pre-build packages
         run: |
             apt-get update
-            apt-get install -y devscripts equivs git-buildpackage build-essential software-properties-common
+            apt-get install -y devscripts equivs git-buildpackage build-essential software-properties-common rename
         env:
           DEBIAN_FRONTEND: "noninteractive"
       # checkout action requires git to be installed and >= 2.18 or it gets weird
@@ -67,8 +67,11 @@ jobs:
       - name: Build Debian package
         run: debuild --no-sign
         working-directory: source
-      - name: List the artifacts
-        run: ls -lh
+      - name: Rename the output files
+        run: |
+            set -o allexport
+            source /etc/os-release
+            rename -v "s/^crtime/crtime-${VERSION_CODENAME}/" crtime*
       - name: Upload the artifacts to the release
         uses: skx/github-action-publish-binaries@master
         env:

@@ -24,7 +24,7 @@ jobs:
         with:
           path: source
       - name: Enable source repositories
-        run: sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list
+        run: sudo sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list
       - name: DUmp
         run: cat /etc/apt/sources.list; ls /etc/apt/sources.list.d/; cat /etc/apt/sources.list.d/*
       - name: Install needed packages

@@ -1,33 +1,25 @@
-# Run when we create a new release/tag
+# Run when we create a new github release
 ---
 on:
-  push:
-    tags:
-      - '*'
-  workflow_dispatch:
+  release:
+    types: [created]
 
 name: Release process
-
-env:
-  SOURCE_DIR: ./
-  ARTIFACTS_DIR: debian/build/release/
 
 jobs:
   create-deb:
     name: Create deb
     runs-on: ubuntu-latest
-    outputs:
-      release-id: ${{ steps.create_release.outputs.id }}
     steps:
+      - name: Drop env for debugging
+        run: env
       - name: Checkout code
         uses: actions/checkout@v2
         with:
           path: source
       - name: Enable source repositories
         run: sudo sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list
-      - name: DUmp
-        run: cat /etc/apt/sources.list; ls /etc/apt/sources.list.d/; cat /etc/apt/sources.list.d/*
-      - name: Install needed packages
+      - name: Install pre-build packages
         run: |
             sudo apt-get update
             sudo apt-get install -y devscripts equivs git-buildpackage build-essential
@@ -40,15 +32,6 @@ jobs:
         working-directory: source
         env:
           DEBIAN_FRONTEND: "noninteractive"
-      - name: Dump git information
-        run: |
-            env
-            git branch -v
-            git remote -v
-            git log --oneline
-            echo ${GITHUB_REF}
-            echo ${GITHUB_REF##*/}
-        working-directory: source
       - name: Update the changelog
         run: |
             set -o allexport
@@ -59,6 +42,11 @@ jobs:
       - name: Build Debian package
         run: debuild --no-sign
         working-directory: source
-      - name: Upload the artifacts
+      - name: List the artifacts
         run: ls -lh
-
+      - name: Upload the artifacts to the release
+        uses: skx/github-action-publish-binaries@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: "crtime*"

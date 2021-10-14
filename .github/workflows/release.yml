@@ -7,7 +7,8 @@ on:
 name: Release process
 
 defaults:
-  shell: bash
+  run:
+    shell: bash
 
 jobs:
   create-debs:

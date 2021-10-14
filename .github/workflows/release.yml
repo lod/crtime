@@ -3,6 +3,7 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
 
 name: Release process
 
@@ -31,7 +32,7 @@ jobs:
         env:
           DEBIAN_FRONTEND: "noninteractive"
       - name: Dump git information
-        run: env; git branch -v; git remote -v; git log --oneline
+        run: env; git branch -v; git remote -v; git log --oneline; echo ${GITHUB_REF}; echo ${GITHUB_REF##*/}
       - name: Update the changelog
         run: set -o allexport; source /etc/os-release; gbp dch --release --new-version=${GITHUB_REF##*/} --distribution=$VERSION_CODENAME --spawn-editor=never --git-ignore-branch
         working-directory: source

@@ -30,8 +30,10 @@ jobs:
         working-directory: source
         env:
           DEBIAN_FRONTEND: "noninteractive"
+      - name: Dump git information
+        run: env; git branch -v; git remote -v; git log --oneline
       - name: Update the changelog
-        run: set -o allexport; source /etc/os-release; gbp dch --release --new-version=${GITHUB_REF##*/} --distribution=$VERSION_CODENAME --spawn-editor=never
+        run: set -o allexport; source /etc/os-release; gbp dch --release --new-version=${GITHUB_REF##*/} --distribution=$VERSION_CODENAME --spawn-editor=never --git-ignore-branch
         working-directory: source
       - name: Build Debian package
         run: debuild --no-sign

@@ -1,4 +1,5 @@
 # Run when we create a new release/tag
+---
 on:
   push:
     tags:
@@ -23,18 +24,33 @@ jobs:
         with:
           path: source
       - name: Install needed packages
-        run: sudo apt-get update && sudo apt-get install -y devscripts equivs git-buildpackage build-essential
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y devscripts equivs git-buildpackage build-essential
         env:
           DEBIAN_FRONTEND: "noninteractive"
       - name: Install build packages
-        run: sudo mk-build-deps --install --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' debian/control
+        run: sudo mk-build-deps --install \
+               --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' \
+               debian/control
         working-directory: source
         env:
           DEBIAN_FRONTEND: "noninteractive"
       - name: Dump git information
-        run: env; git branch -v; git remote -v; git log --oneline; echo ${GITHUB_REF}; echo ${GITHUB_REF##*/}
+        run: |
+            env
+            git branch -v
+            git remote -v
+            git log --oneline
+            echo ${GITHUB_REF}
+            echo ${GITHUB_REF##*/}
+        working-directory: source
       - name: Update the changelog
-        run: set -o allexport; source /etc/os-release; gbp dch --release --new-version=${GITHUB_REF##*/} --distribution=$VERSION_CODENAME --spawn-editor=never --git-ignore-branch
+        run: |
+            set -o allexport
+            source /etc/os-release
+            gbp dch --release --new-version=${GITHUB_REF##*/} --distribution=$VERSION_CODENAME \
+              --spawn-editor=never --git-ignore-branch
         working-directory: source
       - name: Build Debian package
         run: debuild --no-sign

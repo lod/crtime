@@ -10,6 +10,7 @@ jobs:
   create-debs:
     name: Create debian release
     strategy:
+      fail-fast: false
       matrix:
         container:
           - ubuntu:14.04
@@ -27,15 +28,15 @@ jobs:
         with:
           path: source
       - name: Enable source repositories
-        run: sudo sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list
+        run: sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list
       - name: Install pre-build packages
         run: |
-            sudo apt-get update
-            sudo apt-get install -y devscripts equivs git-buildpackage build-essential
+            apt-get update
+            apt-get install -y devscripts equivs git-buildpackage build-essential
         env:
           DEBIAN_FRONTEND: "noninteractive"
       - name: Install build packages
-        run: sudo mk-build-deps --install
+        run: mk-build-deps --install
                --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes'
                debian/control
         working-directory: source

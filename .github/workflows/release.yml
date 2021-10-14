@@ -24,7 +24,6 @@ jobs:
       - name: Drop env for debugging
         run: |
           env
-          git --version
       - name: Enable source repositories
         run: sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list
       - name: Install pre-build packages
@@ -33,7 +32,8 @@ jobs:
             apt-get install -y devscripts equivs git-buildpackage build-essential software-properties-common
         env:
           DEBIAN_FRONTEND: "noninteractive"
-      - name: Upgrade to recent git
+      # checkout action requires git to be installed and >= 2.18 or it gets weird
+      - name: Install recent git
         run: |
               set -o allexport
               source /etc/os-release

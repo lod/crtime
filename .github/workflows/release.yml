@@ -7,9 +7,18 @@ on:
 name: Release process
 
 jobs:
-  create-deb:
-    name: Create deb
+  create-debs:
+    name: Create debian release
+    strategy:
+      matrix:
+        container:
+          - ubuntu:14.04
+          - ubuntu:16.04
+          - ubuntu:18.04
+          - ubuntu:20.04
+          - debian:testing
     runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
     steps:
       - name: Drop env for debugging
         run: env

@@ -22,19 +22,30 @@ jobs:
     container: ${{ matrix.container }}
     steps:
       - name: Drop env for debugging
-        run: env
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          path: source
+        run: |
+          env
+          git --version
       - name: Enable source repositories
         run: sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list
       - name: Install pre-build packages
         run: |
             apt-get update
-            apt-get install -y devscripts equivs git-buildpackage build-essential
+            apt-get install -y devscripts equivs git-buildpackage build-essential software-properties-common
         env:
           DEBIAN_FRONTEND: "noninteractive"
+      - name: Upgrade to recent git
+        run: |
+              set -o allexport
+              source /etc/os-release
+              [[ $ID == ubuntu ]] && add-apt-repository --yes ppa:git-core/ppa
+              apt-get update && apt-get install -y git
+              git --version
+        env:
+          DEBIAN_FRONTEND: "noninteractive"
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          path: source
       - name: Install build packages
         run: mk-build-deps --install
                --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes'

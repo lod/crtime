@@ -33,7 +33,7 @@ jobs:
       - name: Install pre-build packages
         run: |
             apt-get update
-            apt-get install -y devscripts equivs git-buildpackage build-essential software-properties-common rename
+            apt-get install -y devscripts equivs git-buildpackage build-essential software-properties-common
         env:
           DEBIAN_FRONTEND: "noninteractive"
       # checkout action requires git to be installed and >= 2.18 or it gets weird
@@ -71,7 +71,7 @@ jobs:
         run: |
             set -o allexport
             source /etc/os-release
-            rename -v "s/^crtime/crtime-${VERSION_CODENAME}/" crtime*
+            find . -maxdepth 1 -name 'crtime*' -type f -exec bash -c 'mv -v {} $(echo {} | sed "s/crtime/crtime-${VERSION_CODENAME}/")' \;
       - name: Upload the artifacts to the release
         uses: skx/github-action-publish-binaries@master
         env:

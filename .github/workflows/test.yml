@@ -45,13 +45,14 @@ jobs:
           DEBIAN_FRONTEND: "noninteractive"
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Prepare system
+      - name: Compile
+        run: autoreconf --verbose --install --force && ./configure && make
+      - name: Prepare system for tests
         # Need to run as a non-root user who can run sudo
         run: |
             useradd testuser -G sudo
             echo "testuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-      - name: Build Debian package
-        run: autoreconf --verbose --install --force && ./configure && make
+            chown -R testuser .
       - name: Run the tests
         run: sudo --preserve-env --user=testuser make test
         env:

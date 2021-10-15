@@ -38,6 +38,10 @@ jobs:
             echo "::set-output name=version::${VERSION_ID}"
             [[ $VERSION_ID == "14.04" ]] || VERSION_CODENAME=trusty
             echo "::set-output name=codename::${VERSION_CODENAME}"
+      - name: Test os
+        run: echo ${{join(steps.run_tests.outputs.*, '\n')}}; echo "XXXX"; echo $MSG
+        env:
+          MSG: ${{join(steps.run_tests.outputs.*, '\n')}}
       - name: Enable source repositories
         run: sed -i 's/^# deb-src/deb-src/' /etc/apt/sources.list
       - name: Install pre-build packages
@@ -49,7 +53,7 @@ jobs:
       # checkout action requires git to be installed and >= 2.18 or it gets weird
       - name: Install recent git
         run: |
-              [[ {{ steps.os.outputs.distribution }} == ubuntu ]] && add-apt-repository --yes ppa:git-core/ppa
+              [[ ${{ steps.os.outputs.distribution }} == ubuntu ]] && add-apt-repository --yes ppa:git-core/ppa
               apt-get update && apt-get install -y git
               git --version
         env:
@@ -69,7 +73,7 @@ jobs:
         run: |
             [[ $GITHUB_REF == *tags* ]] && VER_OPT="--new-version=${GITHUB_REF##*/}" #"
             # --auto required for trusty/xenial (< 0.9.3)
-            gbp dch --auto --release $VER_OPT --distribution={{ steps.os.outputs.codename }} --spawn-editor=never --ignore-branch
+            gbp dch --auto --release $VER_OPT --distribution=${{ steps.os.outputs.codename }} --spawn-editor=never --ignore-branch
         working-directory: source
       - name: Build Debian package
         # trusty/xenial don't support --no-sign, or long sign options
@@ -77,7 +81,7 @@ jobs:
         working-directory: source
       - name: Rename the output files
         run: |
-            find . -maxdepth 1 -name 'crtime*' -type f -exec bash -c 'mv -v {} $(echo {} | sed "s/crtime/crtime-{{ steps.os.outputs.codename }}/")' \;
+            find . -maxdepth 1 -name 'crtime*' -type f -exec bash -c 'mv -v {} $(echo {} | sed "s/crtime/crtime-${{ steps.os.outputs.codename }}/")' \;
       - name: Upload the artifacts to the release
         uses: skx/github-action-publish-binaries@master
         env:

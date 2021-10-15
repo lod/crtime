@@ -62,7 +62,15 @@ jobs:
             set -o allexport
             source /etc/os-release
             [[ $GITHUB_REF == *tags* ]] && VER_OPT="--new-version=${GITHUB_REF##*/}" #"
-            gbp dch --release $VER_OPT --distribution=$VERSION_CODENAME --spawn-editor=never --ignore-branch
+            gbp dch --auto --release $VER_OPT --distribution=$VERSION_CODENAME --spawn-editor=never --ignore-branch
+            # 0.6.9 fails - trusty
+            # 0.7.2 fails - xenial
+            # 0.9.8 works - bionic
+            # New version adds several options we don't use --dch-opt --upstream-branch --postedit
+            # 0.9.3 made --auto the default
+            # 0.8.18 "unmangle upstream_tag" - fixes KeyError fault
+            # 0.8.1 add 'never' to --spawn-editor choices a6311e6  - I think it will work anyway
+
         working-directory: source
       - name: Build Debian package
         run: debuild --no-sign

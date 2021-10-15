@@ -59,7 +59,7 @@ jobs:
             chown -R testuser .
             dd if=/dev/zero of=loopfile bs=1M count=10
             losetup -f loopfile
-            mkfs.ext4 loopfile
+            mkfs.ext4 -F loopfile
             mkdir testdir
             mount -o loop loopfile testdir
       - name: Run the tests
